@@ -1,59 +1,80 @@
-Bitcoin Core version 0.9.5 is now available from:
+(note: this is a temporary file, to be added-to by anybody, and deleted at
+release time)
 
-  https://bitcoin.org/bin/0.9.5/
+Fee Policy changes
+------------------
 
-This is a new minor version release, bringing only bug fixes and updated
-translations. Upgrading to this release is recommended.
+The default fee for low-priority transactions is lowered from 0.0005 BTC 
+(for each 1,000 bytes in the transaction; an average transaction is
+about 500 bytes) to 0.0001 BTC.
 
-Please report bugs using the issue tracker at github:
+Payments (transaction outputs) of 0.543 times the minimum relay fee
+(0.00005430 BTC) are now considered 'non-standard', because storing them
+costs the network more than they are worth and spending them will usually
+cost their owner more in transaction fees than they are worth.
 
-  https://github.com/bitcoin/bitcoin/issues
+Non-standard transactions are not relayed across the network, are not included
+in blocks by most miners, and will not show up in your wallet until they are
+included in a block.
 
-How to Upgrade
-===============
+The default fee policy can be overridden using the -mintxfee and -minrelaytxfee
+command-line options, but note that we intend to replace the hard-coded fees
+with code that automatically calculates and suggests appropriate fees in the
+0.9 release and note that if you set a fee policy significantly different from
+the rest of the network your transactions may never confirm.
 
-If you are running an older version, shut it down. Wait until it has completely
-shut down (which might take a few minutes for older versions), then run the
-installer (on Windows) or just copy over /Applications/Bitcoin-Qt (on Mac) or
-bitcoind/bitcoin-qt (on Linux).
+Bitcoin-Qt changes
+------------------
 
-Notable changes
-================
+- New icon and splash screen
+- Improve reporting of synchronization process
+- Remove hardcoded fee recommendations
+- Improve metadata of executable on MacOSX and Windows
+- Move export button to individual tabs instead of toolbar
+- Add "send coins" command to context menu in address book
+- Add "copy txid" command to copy transaction IDs from transaction overview
+- Save & restore window size and position when showing & hiding window
+- New translations: Arabic (ar), Bosnian (bs), Catalan (ca), Welsh (cy), Esperanto (eo), Interlingua (la), Latvian (lv) and many improvements to current translations
 
-Mining and relay policy enhancements
-------------------------------------
+MacOSX:
 
-Bitcoin Core's block templates are now for version 3 blocks only, and any mining
-software relying on its `getblocktemplate` must be updated in parallel to use
-libblkmaker either version 0.4.2 or any version from 0.5.1 onward.
-If you are solo mining, this will affect you the moment you upgrade Bitcoin
-Core, which must be done prior to BIP66 achieving its 951/1001 status.
-If you are mining with the stratum mining protocol: this does not affect you.
-If you are mining with the getblocktemplate protocol to a pool: this will affect
-you at the pool operator's discretion, which must be no later than BIP66
-achieving its 951/1001 status.
+- OSX support for click-to-pay (bitcoin:) links
+- Fix GUI disappearing problem on MacOSX (issue #1522)
 
-0.9.5 changelog
-================
+Linux/Unix:
 
-- `74f29c2` Check pindexBestForkBase for null
-- `9cd1dd9` Fix priority calculation in CreateTransaction
-- `6b4163b` Sanitize command strings before logging them.
-- `3230b32` Raise version of created blocks, and enforce DERSIG in mempool
-- `989d499` Backport of some of BIP66's tests
-- `ab03660` Implement BIP 66 validation rules and switchover logic
-- `8438074` build: fix dynamic boost check when --with-boost= is used
+- Copy addresses to middle-mouse-button clipboard
 
-Credits
---------
 
-Thanks to who contributed to this release, at least:
+Command-line options
+--------------------
 
-- 21E14
-- Alex Morcos
-- Cory Fields
-- Gregory Maxwell
-- Pieter Wuille
-- Wladimir J. van der Laan
+* `-walletnotify` will call a command on receiving transactions that affect the wallet.
+* `-alertnotify` will call a command on receiving an alert from the network.
+* `-par` now takes a negative number, to leave a certain amount of cores free.
 
-As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/bitcoin/).
+JSON-RPC API changes
+--------------------
+
+* `listunspent` now lists account and address infromation.
+* `getinfo` now also returns the time adjustment estimated from your peers.
+* `getpeerinfo` now returns bytessent, bytesrecv and syncnode.
+* `gettxoutsetinfo` returns statistics about the unspent transaction output database.
+* `gettxout` returns information about a specific unspent transaction output.
+
+
+Networking changes
+------------------
+
+* Significant changes to the networking code, reducing latency and memory consumption.
+* Avoid initial block download stalling.
+* Remove IRC seeding support.
+* Performance tweaks.
+* Added testnet DNS seeds.
+
+Wallet compatibility/rescuing
+-----------------------------
+
+* Cases where wallets cannot be opened in another version/installation should be reduced.
+* `-salvagewallet` now works for encrypted wallets.
+

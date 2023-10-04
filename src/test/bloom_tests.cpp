@@ -1,19 +1,11 @@
-// Copyright (c) 2012-2013 The Bitcoin Core developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-#include "bloom.h"
-
-#include "base58.h"
-#include "key.h"
-#include "main.h"
-#include "serialize.h"
-#include "uint256.h"
-#include "util.h"
-
+#include <boost/test/unit_test.hpp>
 #include <vector>
 
-#include <boost/test/unit_test.hpp>
+#include "bloom.h"
+#include "util.h"
+#include "key.h"
+#include "base58.h"
+#include "main.h"
 
 using namespace std;
 using namespace boost::tuples;
@@ -81,13 +73,14 @@ BOOST_AUTO_TEST_CASE(bloom_create_insert_key)
     CBitcoinSecret vchSecret;
     BOOST_CHECK(vchSecret.SetString(strSecret));
 
-    CKey key = vchSecret.GetKey();
-    CPubKey pubkey = key.GetPubKey();
-    vector<unsigned char> vchPubKey(pubkey.begin(), pubkey.end());
+    CKey key;
+    bool fCompressed;
+    CSecret secret = vchSecret.GetSecret(fCompressed);
+    key.SetSecret(secret, fCompressed);
 
     CBloomFilter filter(2, 0.001, 0, BLOOM_UPDATE_ALL);
-    filter.insert(vchPubKey);
-    uint160 hash = pubkey.GetID();
+    filter.insert(key.GetPubKey().Raw());
+    uint160 hash = key.GetPubKey().GetID();
     filter.insert(vector<unsigned char>(hash.begin(), hash.end()));
 
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
