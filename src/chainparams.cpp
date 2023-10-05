@@ -79,9 +79,9 @@ public:
         vSeeds.push_back(CDNSSeedData("poolray.com", "poolray.com"));
 
 
-        base58Prefixes[PUBKEY_ADDRESS] = list_of(28);
-        base58Prefixes[SCRIPT_ADDRESS] = list_of(30);
-        base58Prefixes[SECRET_KEY] = list_of(224);
+        base58Prefixes[PUBKEY_ADDRESS] = {28};
+        base58Prefixes[SCRIPT_ADDRESS] = {30};
+        base58Prefixes[SECRET_KEY] = {224};
 
         // Convert the pnSeeds array into usable address objects.
         for (unsigned int i = 0; i < ARRAYLEN(pnSeed); i++)
@@ -142,9 +142,9 @@ public:
         vSeeds.clear();
         // vSeeds.push_back(CDNSSeedData("coinasta.test", "test.coinasta.org"));
 
-        base58Prefixes[PUBKEY_ADDRESS] = list_of(130);
-        base58Prefixes[SCRIPT_ADDRESS] = list_of(30);
-        base58Prefixes[SECRET_KEY] = list_of(239);
+        base58Prefixes[PUBKEY_ADDRESS] = {130};
+        base58Prefixes[SCRIPT_ADDRESS] = {30};
+        base58Prefixes[SECRET_KEY] = {239};
     }
     virtual Network NetworkID() const { return CChainParams::TESTNET; }
 };
@@ -185,9 +185,9 @@ public:
 
         vSeeds.clear();  // Regtest mode doesn't have any DNS seeds.
 
-        // base58Prefixes[PUBKEY_ADDRESS] = list_of(0);
-        // base58Prefixes[SCRIPT_ADDRESS] = list_of(5);
-        // base58Prefixes[SECRET_KEY] = list_of(128);
+        base58Prefixes[PUBKEY_ADDRESS] = {0};
+        base58Prefixes[SCRIPT_ADDRESS] = {5};
+        base58Prefixes[SECRET_KEY] = {128};
     }  
 
     virtual bool RequireRPCPassword() const { return false; }
