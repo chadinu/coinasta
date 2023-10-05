@@ -187,7 +187,7 @@ public:
 
         base58Prefixes[PUBKEY_ADDRESS] = list_of(0);
         base58Prefixes[SCRIPT_ADDRESS] = list_of(5);
-        base58Prefixes[SECRET_KEY] = list_of(128);
+        base58Prefixes[SECRET_KEY] = list_of(129);
     }
 
     virtual bool RequireRPCPassword() const { return false; }
