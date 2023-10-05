@@ -1056,17 +1056,35 @@ uint256 static GetOrphanRoot(const uint256& hash)
 
 int64_t GetBlockValue(int nHeight, int64_t nFees)
 {
-    int64_t nSubsidy = 50 * COIN;
+    int64_t nSubsidy = 2000 * COIN;
+    int64_t nMinSubsidy = 2000 * COIN;
 
     // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
     nSubsidy >>= (nHeight / Params().SubsidyHalvingInterval());
 
+    // Inflation phase: Subsidy reaches minimum subsidy
+    // Network is rewarded for transaction processing with transaction fees and
+    // the inflationary subsidy
+    if (nSubsidy < nMinSubsidy)
+    {
+        nSubsidy = nMinSubsidy;
+    }
+
     return nSubsidy + nFees;
 }
 
-static const int64_t nTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-static const int64_t nTargetSpacing = 10 * 60;
+static const int64_t nTargetTimespan = 60; // two weeks
+static const int64_t nTargetSpacing = 30;
 static const int64_t nInterval = nTargetTimespan / nTargetSpacing;
+
+static const int64_t nAveragingInterval = nInterval * 20; // 40 blocks
+static const int64_t nAveragingTargetTimespan = nAveragingInterval * nTargetSpacing; // 40 minutes
+
+static const int64_t nMaxAdjustDown = 20; // 20% adjustment down
+static const int64_t nMaxAdjustUp = 10; // 10% adjustment up
+
+static const int64_t nTargetTimespanAdjDown = nTargetTimespan * (100 + nMaxAdjustDown) / 100;
+
 
 //
 // minimum amount of work that could possibly be required nTime after
@@ -1085,14 +1103,18 @@ unsigned int ComputeMinWork(unsigned int nBase, int64_t nTime)
     while (nTime > 0 && bnResult < bnLimit)
     {
         // Maximum 400% adjustment...
-        bnResult *= 4;
-        // ... in best-case exactly 4-times-normal target time
-        nTime -= nTargetTimespan*4;
+        bnResult *= (100 + nMaxAdjustDown);
+        bnResult /= 100;
+        // ... in best-case exactly adjustment times-normal target time
+        nTime -= nTargetTimespanAdjDown;
     }
     if (bnResult > bnLimit)
         bnResult = bnLimit;
     return bnResult.GetCompact();
 }
+
+static const int64_t nMinActualTimespan = nAveragingTargetTimespan * (100 - nMaxAdjustUp) / 100;
+static const int64_t nMaxActualTimespan = nAveragingTargetTimespan * (100 + nMaxAdjustDown) / 100;
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock)
 {
@@ -1100,6 +1122,9 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     // Genesis block
     if (pindexLast == NULL)
+        return nProofOfWorkLimit;
+
+    if (pindexLast->nHeight+1 < nAveragingInterval)
         return nProofOfWorkLimit;
 
     // Only change once per interval
@@ -1126,30 +1151,30 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     // Go back by what we want to be 14 days worth of blocks
     const CBlockIndex* pindexFirst = pindexLast;
-    for (int i = 0; pindexFirst && i < nInterval-1; i++)
+    for (int i = 0; pindexFirst && i < nAveragingInterval-1; i++)
         pindexFirst = pindexFirst->pprev;
     assert(pindexFirst);
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
     LogPrintf("  nActualTimespan = %"PRId64"  before bounds\n", nActualTimespan);
-    if (nActualTimespan < nTargetTimespan/4)
-        nActualTimespan = nTargetTimespan/4;
-    if (nActualTimespan > nTargetTimespan*4)
-        nActualTimespan = nTargetTimespan*4;
+    if (nActualTimespan < nMinActualTimespan)
+        nActualTimespan = nMinActualTimespan;
+    if (nActualTimespan > nMaxActualTimespan)
+        nActualTimespan = nMaxActualTimespan;
 
     // Retarget
     CBigNum bnNew;
     bnNew.SetCompact(pindexLast->nBits);
     bnNew *= nActualTimespan;
-    bnNew /= nTargetTimespan;
+    bnNew /= nAveragingTargetTimespan;
 
     if (bnNew > Params().ProofOfWorkLimit())
         bnNew = Params().ProofOfWorkLimit();
 
     /// debug print
     LogPrintf("GetNextWorkRequired RETARGET\n");
-    LogPrintf("nTargetTimespan = %"PRId64"    nActualTimespan = %"PRId64"\n", nTargetTimespan, nActualTimespan);
+    LogPrintf("nTargetTimespan = %"PRId64"    nActualTimespan = %"PRId64"\n", nAveragingTargetTimespan, nActualTimespan);
     LogPrintf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString());
     LogPrintf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString());
 
