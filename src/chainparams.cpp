@@ -34,7 +34,7 @@ public:
         pchMessageStart[2] = 0x07;
         pchMessageStart[3] = 0x07;
         nDefaultPort = 2333;
-        nRPCPort = 2334;
+        nRPCPort = 8332;
         bnProofOfWorkLimit = CBigNum(~uint256(0) >> 20);
         nSubsidyHalvingInterval = 8000000;
 
@@ -70,13 +70,13 @@ public:
         printf("%s\n", hashGenesisBlock.ToString().c_str());
         printf("%s\n", genesis.hashMerkleRoot.ToString().c_str());
         printf("%x\n", bnProofOfWorkLimit.GetCompact());
-        genesis.print();
+        // genesis.print();
         
         
         assert(hashGenesisBlock == uint256("0x000005232c6fe11ca78e898bcd61a031b461dee02ef950dae74423c3fcbd8e69"));
         assert(genesis.hashMerkleRoot == uint256("0x45f6e843dd705c7e74c4159857e26283de0003bb3f99946bbd1c52fb04df89b2"));
 
-        vSeeds.push_back(CDNSSeedData("poolray.com", "poolray.com"));
+        // vSeeds.push_back(CDNSSeedData("poolray.com", "poolray.com"));
 
 
         base58Prefixes[PUBKEY_ADDRESS] = {28};
@@ -136,7 +136,7 @@ public:
 
         printf("%s\n", hashGenesisBlock.ToString().c_str());
         printf("%s\n", genesis.hashMerkleRoot.ToString().c_str());
-        genesis.print();
+        // genesis.print();
 
         vFixedSeeds.clear();
         vSeeds.clear();
@@ -179,7 +179,7 @@ public:
 
         printf("%s\n", hashGenesisBlock.ToString().c_str());
         printf("%s\n", genesis.hashMerkleRoot.ToString().c_str());
-        genesis.print();
+        // genesis.print();
 
         // assert(hashGenesisBlock == uint256("0x13d8d31dde96874006da503dd2b63fa68c698dc823334359e417aa3a92f80433"));
 
